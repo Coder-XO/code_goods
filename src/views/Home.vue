@@ -6,21 +6,18 @@
     <van-button type="default">默认按钮</van-button>
     <van-button type="warning">警告按钮</van-button>
     <van-button type="danger">危险按钮</van-button>
+    <van-rate v-model="value"/>
   </div>
 </template>
 
 <script>
-// @ is an alias to /src
-import HelloWorld from '@/components/HelloWorld.vue'
-// vant 组件的使用
-import Vue from 'vue'
-import { Button } from 'vant';
-Vue.use(Button)
-import 'vant/lib/button/style';
 export default {
   name: 'Home',
-  components: {
-    HelloWorld
-  }
+  data() {
+    return {
+      value: 3,
+    }
+  },
+  components: {}
 }
 </script>
