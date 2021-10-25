@@ -1,31 +1,36 @@
 <template>
   <div id="app">
-    <div id="nav">
-      <router-link to="/">Home</router-link>
-    </div>
-    <router-view/>
+    <router-view></router-view>
+    <TabBar></TabBar>
   </div>
 </template>
+<script>
+import Home from "@/views/Home";
+import TabBar from "@/components/TabBar";
 
+export default {
+  name: 'App',
+  data() {
+    return {
+      value: 3,
+    }
+  },
+  components: {
+    TabBar,
+    Home
+  }
+}
+</script>
 <style lang="less">
 #app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
+  background-color: #efefef;
+  min-height: 100%;
+  font-size: .16rem;
 }
 
-#nav {
-  padding: 30px;
-
-  a {
-    font-weight: bold;
-    color: #2c3e50;
-
-    &.router-link-exact-active {
-      color: #42b983;
-    }
-  }
+html, body {
+  height: 100%;
+  width: 100%;
+  font-size: 100px !important;
 }
 </style>
