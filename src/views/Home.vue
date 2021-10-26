@@ -2,20 +2,22 @@
   <div class="home">
     <!-- 搜索框位置 -->
     <van-search disabled v-model="value" placeholder="请输入搜索关键词" shape="round"
-                @click="$router.push('/home/SearchPopup')"/>
-    <van-swipe class="my-swipe" :autoplay="3000" indicator-color="white">
+                @click="$router.push('/home/SearchPopup')" v-show="isHomeShow"/>
+    <van-swipe class="my-swipe" :autoplay="3000" indicator-color="white" v-show="isHomeShow">
       <van-swipe-item v-for="v in banner" :key="v.id">
         <img :src="v.image_url" alt="" width="100%">
       </van-swipe-item>
     </van-swipe>
-    <van-grid :column-num="5">
-      <van-grid-item v-for="(v,k) in iconList" :key="v.name" :icon="v.icon_url" :text="v.name"/>
+    <!--    五个分类-->
+    <van-grid :column-num="5" v-show="isHomeShow">
+      <van-grid-item v-for="(v,k) in iconList" :key="v.name" :icon="v.icon_url" :text="v.name"
+                     @click="toChannel(v.id)"/>
     </van-grid>
     <!--    品牌-->
-    <div class="brand">
+    <div class="brand" v-show="isHomeShow">
       <h1>品牌制造商</h1>
       <div class="goods">
-        <div class="item" v-for="v in brandList" :key="v.id">
+        <div class="item" v-for="v in brandList" :key="v.id" @click="toBrand(v.id)">
           <img :src="v.pic_url" alt="">
           <h4>{{ v.name }}</h4>
           <p>￥ {{ v.floor_price|toFixed }} 元</p>
@@ -23,7 +25,7 @@
       </div>
     </div>
     <!--    新品首发  -->
-    <div class="brand">
+    <div class="brand" v-show="isHomeShow">
       <h1>周一周四 . 新品首发</h1>
       <div class="goods newGood">
         <div class="item" v-for="v in newGoods" :key="v.id">
@@ -34,7 +36,7 @@
       </div>
     </div>
     <!--    人齐推荐  -->
-    <div class="brand">
+    <div class="brand" v-show="isHomeShow">
       <h1>人气推荐</h1>
       <div class="goods hotGood">
         <div class="item" v-for="v in hotList" :key="v.id">
@@ -48,7 +50,7 @@
       </div>
     </div>
     <!--    专题精选 -->
-    <div class="brand topList">
+    <div class="brand topList" v-show="isHomeShow">
       <h1>专题精选</h1>
       <div class="big_box">
         <div class="item_box">
@@ -62,14 +64,15 @@
     </div>
     <!--    分类-->
     <sort-i-item
+        v-show="isHomeShow"
         v-for="(v,k) in sortList"
         :key="v.id"
         :name="v.name"
         :goodsList="v.goodsList">
     </sort-i-item>
-    <!-- 搜索框 -->
+    <!-- 弹出的搜索框 -->
     <transition name="slide">
-      <router-view></router-view>
+      <router-view @changeHomeShow="changeShow"></router-view>
     </transition>
   </div>
 </template>
@@ -77,6 +80,7 @@
 // 封装的请求接口
 import {GetHomeList} from "@/request/api";
 import SortIItem from "@/components/SortIItem";
+import {Toast} from 'vant';
 
 export default {
   name: 'Home',
@@ -90,10 +94,17 @@ export default {
       newGoods: [],    // 新品
       hotList: [],     // 热门商品
       topicList: [],   // 专题精选
-      sortList: []    // 分类数据
+      sortList: [],    // 分类数据
+      isHomeShow: true
     }
   },
   created() {
+    // 加载提示
+    Toast.loading({
+      message: '加载中...',
+      forbidClick: true,
+      duration: 200
+    });
     //   首页所有数据 banner 图数据
     GetHomeList().then(res => {
       console.log(res)
@@ -111,6 +122,37 @@ export default {
   filters: {
     toFixed(value) {
       return value.toFixed(2)
+    }
+  },
+  methods: {
+    // 去品牌详情
+    toBrand(v) {
+      this.$router.push({
+        path: '/brand',
+        query: {
+          id: v
+        }
+      })
+    },
+    // 控制主页显示隐藏  滚动条问题
+    changeShow(value) {
+      this.isHomeShow = value
+    },
+    toChannel(value) {
+      this.$router.push({
+        path: '/channel',
+        query: {
+          id: value
+        }
+      })
+    }
+  },
+  // 监听 router
+  watch: {
+    $route: {
+      handler(url) {
+        this.isHomeShow = url.path === '/'
+      }
     }
   }
 }
@@ -287,6 +329,10 @@ export default {
     overflow-x: auto;
     box-sizing: border-box;
     padding: 0 .1rem;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
 
     .item_box {
       width: 9.3rem;

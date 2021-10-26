@@ -3,28 +3,57 @@
     <div class="his-hot">
       <div class="hd">
         <h4>历史记录</h4>
-        <van-icon name="delete-o"/>
+        <van-icon name="delete-o" @click="delAll"/>
       </div>
       <div class="tag">
-        <van-tag plain type="default" v-for="(v,k) in historyKeywordList" :key="k">{{ v }}</van-tag>
+        <van-tag plain type="default" v-for="(v,k) in historyKeywordList" :key="k" @click="hisSearch(v)">{{
+            v
+          }}
+        </van-tag>
       </div>
     </div>
     <div class="his-hot">
       <h4>热门搜索</h4>
       <div class="tag">
-        <van-tag :color="v.is_hot===1?'red':''" plain type="default" v-for="(v,k) in hotKeywordList" :key="k">{{ v.keyword }}</van-tag>
+        <van-tag :color="v.is_hot===1?'red':''" plain type="default" v-for="(v,k) in hotKeywordList" :key="k"
+                 @click="hotSearch(v.keyword)">
+          {{ v.keyword }}
+        </van-tag>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import {DeleteAllHot} from "@/request/api";
+import {Toast} from 'vant';
+
 export default {
   name: "HistoryHot",
   data() {
     return {};
   },
-  methods: {},
+  methods: {
+    delAll() {   // 删除历史记录
+      DeleteAllHot().then(res => {
+            if (res.errno === 0) {
+              this.$emit("changeTags")
+              Toast.success('清除成功');
+            }
+          },
+          err => {
+            console.log(err)
+          })
+    },
+    // 历史标签搜索
+    hisSearch(v) {
+      this.$emit('clickHistory', v)
+    },
+    // 热门标签搜索
+    hotSearch(v) {
+      this.$emit('clickHistory', v)
+    }
+  },
   computed: {},
   watch: {},
   props: {     // 父组件传来的数据

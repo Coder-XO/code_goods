@@ -1,11 +1,11 @@
 <template>
   <div class="big_item">
-    <h4>{{name}}</h4>
+    <h4 v-if="name!=0">{{ name }}</h4>
     <div class="item_container">
-      <div class="item" v-for="(v,k) in goodsList" :key="v.id">
+      <div class="item" v-for="(v,k) in goodsList" :key="v.id" @click="toDetail(v.id)">
         <img :src="v.list_pic_url" alt="">
-        <h4>{{v.name}}</h4>
-        <p>￥ {{v.retail_price|toFixed}} 元</p>
+        <h4>{{ v.name }}</h4>
+        <p>￥ {{ v.retail_price|toFixed }} 元</p>
       </div>
     </div>
   </div>
@@ -17,7 +17,17 @@ export default {
   data() {
     return {};
   },
-  methods: {},
+  methods: {
+    // 进入详情页面
+    toDetail(id) {
+      this.$router.push({
+        path: '/detail',
+        query: {
+          id: id
+        }
+      })
+    }
+  },
   computed: {},
   watch: {},
   props: {
@@ -27,7 +37,7 @@ export default {
     },
     "name": {
       type: String,
-      default: []
+      default: ""
     }
   },
   components: {},
@@ -46,6 +56,8 @@ export default {
 .big_item {
   width: 100%;
   background-color: #fff;
+  padding-bottom: .5rem;
+  padding-top: .4rem;
 
   h4 {
     text-align: center;
@@ -76,7 +88,7 @@ export default {
         color: #333;
         height: .3rem;
         overflow: hidden;
-        text-overflow:ellipsis;
+        text-overflow: ellipsis;
         white-space: nowrap;
         line-height: .3rem;
       }

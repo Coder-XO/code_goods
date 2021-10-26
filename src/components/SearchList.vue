@@ -6,7 +6,7 @@
         finished-text="没有更多了"
         @load="onLoad"
     >
-      <van-cell v-for="item in searchList" :key="item" :title="item"/>
+      <van-cell v-for="item in searchList" :key="item" @click="searchGood(item)" :title="item"/>
     </van-list>
   </div>
 </template>
@@ -26,6 +26,9 @@ export default {
     onLoad() {
       // console.log(111)
     },
+    searchGood(value) {   // 传递给父组件关键词
+      this.$emit("changeKeyword", value)
+    }
   },
   computed: {},
   watch: {},

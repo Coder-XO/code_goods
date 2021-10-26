@@ -24,8 +24,10 @@ export default {
 <style lang="less">
 #app {
   background-color: #efefef;
-  min-height: 100%;
+  //min-height: 100%;
   font-size: .16rem;
+  height: 100%;
+  width: 100%;
 }
 
 html, body {
