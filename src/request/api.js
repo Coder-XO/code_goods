@@ -12,3 +12,6 @@ export const GetCurrentTypeList = (params) => request.get('/catalog/current', {p
 export const GetCurrentGood = (params) => request.get('/goods/detail', {params})
 export const GetRelatedGoods = (params) => request.get('/goods/related', {params})
 export const GetBrandDetail = (params) => request.get('/brand/detail', {params})
+export const DoLogin = (params) => request.post('/auth/loginByWeb', params)
+export const ChangeChecked = (params) => request.post('/cart/checked', params)
+export const CartUpdate = (params) => request.post('/cart/update', params)

@@ -9,6 +9,12 @@ const instance = axios.create(
 // 请求拦截 (每次请求前都执行一次请求拦截的代码)
 instance.interceptors.request.use(config => {
     // console.log("我被执行了!")   // 拦截函数
+    let Token = localStorage.getItem('token')
+    if (Token) {
+        config.headers.common = {
+            'X-Nideshop-Token': Token,
+        }
+    }
     return config   // config此次请求的配置信息
 }, err => {
     // 错误信息

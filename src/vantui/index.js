@@ -24,7 +24,16 @@ import {
     GoodsAction,
     GoodsActionButton,
     GoodsActionIcon,
-    NavBar
+    NavBar,
+    Overlay,
+    Form,
+    Field,
+    Sku,
+    Stepper,
+    Checkbox,
+    CheckboxGroup,
+    Card,
+    SubmitBar
 } from 'vant';
 import {Image as VanImage} from 'vant';
 
@@ -54,3 +63,12 @@ Vue.use(GoodsAction);
 Vue.use(GoodsActionButton);
 Vue.use(GoodsActionIcon);
 Vue.use(NavBar);
+Vue.use(Overlay);
+Vue.use(Form);
+Vue.use(Field);
+Vue.use(Sku);
+Vue.use(Stepper);
+Vue.use(Checkbox);
+Vue.use(CheckboxGroup);
+Vue.use(Card);
+Vue.use(SubmitBar);

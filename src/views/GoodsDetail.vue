@@ -18,11 +18,11 @@
         </div>
         <div class="item">
           <van-icon name="wechat-pay" color="#9B0000"/>
-          <span>30天无忧退货</span>
+          <span>48小时快速退费</span>
         </div>
         <div class="item">
           <van-icon name="wechat-pay" color="#9B0000"/>
-          <span>30天无忧退货</span>
+          <span>满80元包邮费</span>
         </div>
       </div>
       <!--      商品描述-->
@@ -59,13 +59,29 @@
           left-arrow
           @click-left="onClickLeft"
       />
+      <!--      弹出遮罩层-->
+      <van-overlay :show="show" @click="show = false">
+        <div class="wrapper">
+          <div class="block" @click.stop>
+            <div class="top">
+              <img :src="list_pic_url" alt="">
+              <div class="right">
+                <p>价格: ￥ {{ goodPrice|toFixed }} 元</p>
+                <p>库存: {{ storage }}</p>
+              </div>
+            </div>
+            <h2>数量 :</h2>
+            <van-stepper v-model="value" min="1" :max="storage"/>
+          </div>
+        </div>
+      </van-overlay>
     </div>
     <!--    底部购物车-->
     <van-goods-action>
       <van-goods-action-icon icon="star" text="已收藏" color="#ff5000"/>
-      <van-goods-action-icon icon="cart-o" text="购物车" badge="5"/>
-      <van-goods-action-button type="warning" text="加入购物车"/>
+      <van-goods-action-icon icon="cart-o" text="购物车" :badge="badge" @click="toCart"/>
       <van-goods-action-button type="danger" text="立即购买"/>
+      <van-goods-action-button type="warning" text="加入购物车" @click="addCart"/>
     </van-goods-action>
   </div>
 </template>
@@ -75,6 +91,8 @@ import {GetCurrentGood} from "@/request/api";
 import {GetRelatedGoods} from "@/request/api";
 import SortIItem from "@/components/SortIItem";
 import {Toast} from 'vant';
+import axios from "axios";
+
 export default {
   name: "GoodsDetail",
   data() {
@@ -87,15 +105,66 @@ export default {
       goodDetailDesc: '',
       attribute: [],
       issueList: [],
-      relatedGoods: []
+      relatedGoods: [],
+      show: false,
+      // 遮罩层数据
+      list_pic_url: '',
+      storage: 0,
+      // 遮罩层购物车数量
+      value: 1,
+      badge: 0,
+      // 产品 id
+      productId: 0
     };
   },
   methods: {
-    onClickIcon() {
-      console.log('点击图标了')
+    // 添加购物车
+    addCart() {
+      if (this.show) {   // 真正加入购物车
+        if (!localStorage.getItem('token')) {
+          this.$router.push({
+            path: '/cart'
+          })
+        } else {   // 可以调用加入购物车逻辑了
+          // 添加购物车
+          axios.post('http://kumanxuan1.f3322.net:8001/cart/add', {
+            goodsId: this.$route.query.id,
+            productId: this.productId,
+            number: this.value
+          }, {
+            headers: {
+              'X-Nideshop-Token': localStorage.getItem('token')
+            }
+          }).then(res => {
+            console.log(res)
+            if (res.data.errno === 0) {    // 添加成功!
+              Toast.success('添加成功!')
+              this.show = false
+              // 请求购物车数量
+              axios.post('http://kumanxuan1.f3322.net:8001/cart/goodscount', {}, {
+                headers: {
+                  'X-Nideshop-Token': localStorage.getItem('token')
+                }
+              }).then(res => {
+                this.badge = res.data.data.cartTotal.goodsCount
+              })
+            } else if (res.data.errno === 400) {
+              Toast.success('库存不足!')
+              this.show = false
+            } else {
+              Toast.fail(res.data.errmsg)
+              this.show = false
+            }
+          })
+        }
+      }
+      this.show = true
     },
-    onClickButton() {
-      console.log('点击按钮了')
+    // 去购物车
+    toCart() {
+      this.$router.push({
+        path: '/cart'
+      })
     },
     onClickLeft() {
       this.$router.push({
@@ -118,6 +187,12 @@ export default {
               this.attribute = res.data.attribute
               this.goodDetailDesc = res.data.info.goods_desc
               this.issueList = res.data.issue
+              // 遮罩层的数据
+              this.list_pic_url = res.data.info.list_pic_url
+              this.storage = res.data.info.goods_number
+              // 产品 id
+              this.productId = res.data.productList[0].id
+              console.log(this.productId)
               GetRelatedGoods({id: id}).then(res => {
                     this.relatedGoods = res.data.goodsList
                   },
@@ -161,6 +236,11 @@ export default {
           this.attribute = res.data.attribute
           this.goodDetailDesc = res.data.info.goods_desc
           this.issueList = res.data.issue
+          // 遮罩层的数据
+          this.list_pic_url = res.data.info.list_pic_url
+          this.storage = res.data.info.goods_number
+          this.productId = res.data.productList[0].id
+          console.log(this.productId)
           GetRelatedGoods({id: id}).then(res => {
                 this.relatedGoods = res.data.goodsList
               },
@@ -171,6 +251,14 @@ export default {
         err => {
           console.log(err)
         })
+    // 请求购物车数量
+    axios.post('http://kumanxuan1.f3322.net:8001/cart/goodscount', {}, {
+      headers: {
+        'X-Nideshop-Token': localStorage.getItem('token')
+      }
+    }).then(res => {
+      this.badge = res.data.data.cartTotal.goodsCount
+    })
   }
 };
 </script>
@@ -297,6 +385,7 @@ div.innerBox {
   overflow: auto;
   background-color: #EFEFEF;
   padding-bottom: .5rem;
+  padding-top: .5rem;
 
   /deep/ .goodDetail {
     p {
@@ -390,5 +479,56 @@ div.go {
   span {
     font-size: .14rem;
   }
+}
+
+
+// 遮罩层数据
+.wrapper {
+  position: relative;
+  height: 100%;
+}
+
+.block {
+  box-sizing: border-box;
+  padding: .1rem;
+  position: absolute;
+  width: 100%;
+  height: 2.65rem;
+  background-color: #fff;
+  bottom: 0;
+
+  .top {
+    display: flex;
+    justify-content: space-between;
+
+    img {
+      display: block;
+      width: 1rem;
+      height: 1rem;
+    }
+
+    .right {
+      height: 1rem;
+      //background-color: #9B0000;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+      box-sizing: border-box;
+      padding: .1rem;
+
+      p {
+        color: #333;
+        font-size: .14rem;
+      }
+    }
+  }
+
+
+  h2 {
+    font-size: .2rem;
+    padding: .2rem 0;
+  }
+
 }
 </style>

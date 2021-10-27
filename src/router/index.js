@@ -1,6 +1,8 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Home from '../views/Home.vue'
+import {Toast} from 'vant';
+import '../vantui'
 
 Vue.use(VueRouter)
 
@@ -89,9 +91,29 @@ const router = new VueRouter({
     routes
 })
 
-// router.beforeEach((to, from, next) => {
-//     console.log(to, from)
-//     next()
-// })
+// 全局路由守卫
+router.beforeEach((to, from, next) => {
+    if (to.name === 'Cart') {
+        if (!localStorage.getItem('token')) {
+            // 加载提示
+            Toast.loading({
+                message: '请先登录...',
+                forbidClick: true,
+                duration: 1000
+            });
+            setTimeout(() => {
+                router.push({
+                    path: '/me'
+                })
+            }, 1000)
+            localStorage.setItem('prePath', from.path)
+            return
+        } else {
+            next()
+        }
+    } else {
+        next()
+    }
+})
 
 export default router
