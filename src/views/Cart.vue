@@ -28,6 +28,7 @@
               :thumb="v.list_pic_url"
           >
             <template #footer>
+              <van-button type="danger" v-if="!isShow" @click="del(v.product_id)">删除</van-button>
               <van-stepper v-model="v.number" v-if="!isShow" @change="fu"/>
             </template>
           </van-card>
@@ -35,12 +36,12 @@
       </van-checkbox-group>
     </div>
     <!--    结算     -->
-    <van-submit-bar :price="biged(totalPrice)" button-text="提交订单" @submit="onSubmit">
+    <van-submit-bar :price="biged(totalPrice)" button-text="提交订单">
       <van-checkbox v-model="checked" @click="allSelect" :disabled="!isShow">全选</van-checkbox>
       <div v-show="isShow" class="wrap">
         累计共{{ goodsCount }}件商品,可点击
         <van-button type="primary" @click="isShow=false">编辑</van-button>
-        按钮进行商品数量修改
+        按钮进行商品数量修改与删除
       </div>
       <div v-show="!isShow" class="wrap">
         累计共{{ goodsCount }}件商品，可点击
@@ -54,7 +55,7 @@
 <script>
 import {Toast} from "vant";
 import axios from "axios";
-import {ChangeChecked, CartUpdate} from "@/request/api";
+import {ChangeChecked, CartUpdate, CartDelete} from "@/request/api";
 
 export default {
   name: "Cart",
@@ -73,6 +74,14 @@ export default {
     };
   },
   methods: {
+    // 删除
+    del(id) {
+      CartDelete({productIds: String(id)}).then(res => {
+        console.log(res)
+        this.cartList = res.data.cartList
+        this.totalPrice = res.data.cartTotal.checkedGoodsAmount
+      })
+    },
     // 乘100
     biged(value) {
       return value * 100
@@ -87,7 +96,7 @@ export default {
           number: v,
           productId: this.currentProductId
         }).then((res) => {
-          console.log(res)
+          // console.log(res)
 
           // 更新  数量与  总价
           // 请求用户的购物车数据
@@ -96,6 +105,7 @@ export default {
               'X-Nideshop-Token': localStorage.getItem('token')
             }
           }).then(res => {
+            console.log('我更新了啊!')
             this.goodsCount = res.data.data.cartTotal.checkedGoodsCount
             this.totalPrice = res.data.data.cartTotal.checkedGoodsAmount
           })
@@ -112,27 +122,55 @@ export default {
         ids.push(String(item.product_id))
       })
       if (!this.checked) {    // 全选
+
+
+        console.log('全选执行了!')
         ChangeChecked({isChecked: 0, productIds: ids}).then(res => {
-          console.log(res)
+          // console.log(res)
+          /**
+           * 更新数据
+           */
+          // 请求用户的购物车数据
+          axios.post('http://kumanxuan1.f3322.net:8001/cart/index', {}, {
+            headers: {
+              'X-Nideshop-Token': localStorage.getItem('token')
+            }
+          }).then(res => {
+            this.cartList = res.data.data.cartList
+            this.goodsCount = res.data.data.cartTotal.checkedGoodsCount
+            this.totalPrice = res.data.data.cartTotal.checkedGoodsAmount
+            // 改变按钮状态
+            this.result = []
+
+          })
         })
-        this.result = []
       } else {    // 全不选
 
-        console.log('fuckkk')
+
+        console.log('全不选执行了!')
         ChangeChecked({isChecked: 1, productIds: ids}).then(res => {
-          console.log(res)
+          // console.log(res)
+          /**
+           * 更新数据
+           */
+          // 请求用户的购物车数据
+          axios.post('http://kumanxuan1.f3322.net:8001/cart/index', {}, {
+            headers: {
+              'X-Nideshop-Token': localStorage.getItem('token')
+            }
+          }).then(res => {
+            this.cartList = res.data.data.cartList
+            this.goodsCount = res.data.data.cartTotal.checkedGoodsCount
+            this.totalPrice = res.data.data.cartTotal.checkedGoodsAmount
+          })
         })
+
+        // 改变按钮选中状态
         this.result = []
         this.cartList.forEach((item) => {
           this.result.push(String(item.product_id))
         })
       }
-    },
-    onSubmit() {
-
-    },
-    onClickEditAddress() {
-
     },
     // 小数转换
     toFixed(value) {
@@ -193,24 +231,7 @@ export default {
     }
   },
   computed: {},
-  watch: {
-    // // 选中状态变化了
-    // result: {
-    //   handler(newValue, oldValue) {     // 改变状态
-    //     if (newValue.length > oldValue.length) {   // 添加选中
-    //       console.log('添加')
-    //       ChangeChecked({isChecked: '1', productIds: `${newValue[newValue.length - 1]}`}).then(res => {
-    //         console.log(res)
-    //       })
-    //     } else {   // 减少选中
-    //       console.log('减少')
-    //       ChangeChecked({isChecked: '0', productIds: `${oldValue[oldValue.length - 1]}`}).then(res => {
-    //         console.log(res)
-    //       })
-    //     }
-    //   }
-    // }
-  },
+  watch: {},
   props: {},
   components: {},
   created() {
